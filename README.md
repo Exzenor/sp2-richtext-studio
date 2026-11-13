@@ -4,7 +4,7 @@ SimplePlanes 2 (SP2) için Label ve HUD görsellerini RichText koduna dönüşt�
 
 ## Canlı Kullanım (İndirmeden Aç)
 Uygulamayı doğrudan tarayıcınızdan kullanmak için:
-👉 **https://KULLANICI-ADIN.github.io/sp2-richtext-studio/**
+👉 **https://Exzenor.github.io/sp2-richtext-studio/**
 
 ## Özellikler
 - PNG / JPG / WEBP görsellerini SP2 `Label.State` uyumlu RichText formatına çevirir.
@@ -28,7 +28,7 @@ A web-based creative tool that converts images into RichText code for SimplePlan
 
 ## Live Demo (No Download Required)
 Use the application directly in your browser:
-👉 **https://YOUR-USERNAME.github.io/sp2-richtext-studio/**
+👉 **https://Exzenor.github.io/sp2-richtext-studio/**
 
 ## Features
 - Converts PNG / JPG / WEBP images into SP2 `Label.State` compatible RichText format.
