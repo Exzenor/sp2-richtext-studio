@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SP2 RichText Studio — Exzenor</title>
+<style>
+  :root {
+    --bg: #12141a;
+    --panel: rgba(30, 34, 43, 0.88);
+    --panel-solid: #1e222b;
+    --border: rgba(255, 255, 255, 0.09);
+    --text: #e6eaf2;
+    --muted: #98a2b3;
+    --input-bg: rgba(16, 18, 24, 0.85);
+    --input-border: #3a4152;
+    --out-bg: #0f1116;
+    --out-text: #7dff9b;
+    --accent: #2b7de9;
+    --title: #6ec1ff;
+    --sec-bg: #323846;
+    --sec-hover: #424a5c;
+    --ok-bg: rgba(22, 51, 34, 0.9); --ok-bd: #2a7a4b; --ok-tx: #9cf5be;
+    --warn-bg: rgba(56, 35, 21, 0.9); --warn-bd: #a85a24; --warn-tx: #ffd0a6;
+    --crit-bg: rgba(61, 20, 25, 0.9); --crit-bd: #b82838; --crit-tx: #ffb3ba;
+    --wm-opacity: 0.09;
+  }
+  body.light {
+    --bg: #e9edf4;
+    --panel: rgba(255, 255, 255, 0.88);
+    --panel-solid: #ffffff;
+    --border: rgba(20, 30, 50, 0.12);
+    --text: #1b222c;
+    --muted: #5a6577;
+    --input-bg: rgba(244, 246, 250, 0.92);
+    --input-border: #c5cedb;
+    --out-bg: #f4f6f9;
+    --out-text: #0f6b36;
+    --title: #175fc2;
+    --sec-bg: #e1e6ef;
+    --sec-hover: #cfd7e4;
+    --ok-bg: rgba(230, 246, 236, 0.95); --ok-bd: #399961; --ok-tx: #14532d;
+    --warn-bg: rgba(255, 243, 230, 0.95); --warn-bd: #d97706; --warn-tx: #7c2d12;
+    --crit-bg: rgba(253, 232, 234, 0.95); --crit-bd: #dc2626; --crit-tx: #7f1d1d;
+    --wm-opacity: 0.07;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 16px;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+    transition: background .2s, color .2s;
+  }
+
+  /* Soluk Arka Plan Filigranı (SP2 Türkiye) */
+  .bg-watermark {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .bg-watermark img {
+    width: min(760px, 88vw);
+    height: auto;
+    opacity: var(--wm-opacity);
+    filter: saturate(0.85);
+    user-select: none;
+    border-radius: 50%;
+  }
+
+  .app-shell {
+    position: relative;
+    z-index: 1;
+    max-width: 1320px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Profesyonel Üst Menü (Header) */
+  .navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 18px;
+    background: var(--panel);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    flex-wrap: wrap;
+  }
+  .brand-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .sp2-logo-img {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
+  }
+  .brand-divider {
+    width: 1px;
+    height: 28px;
+    background: var(--border);
+  }
+  .brand-title-wrap {
+    display: flex;
+    flex-direction: column;
+  }
+  .brand-name {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    color: var(--title);
+  }
+  .brand-sub {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .tools {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 8px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+  }
+  .color-tool {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 0 4px;
+  }
+  .color-tool span { font-weight: 600; }
+  input[type="color"] {
+    width: 24px;
+    height: 24px;
+    padding: 1px;
+    margin: 0;
+    border-radius: 5px;
+    border: 1px solid var(--input-border);
+    background: transparent;
+    cursor: pointer;
+  }
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    margin: 0;
+    border-radius: 6px;
+    border: 1px solid var(--input-border);
+    background: var(--panel-solid);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 13px;
+    transition: border-color .15s, transform .1s;
+  }
+  .icon-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .lang-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--panel-solid);
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    padding: 0 6px;
+    height: 28px;
+  }
+  .lang-wrap select {
+    margin: 0; padding: 2px; border: 0; background: transparent;
+    color: var(--text); font-size: 12px; width: auto; cursor: pointer; outline: none;
+  }
+  .lang-wrap select option { background: var(--panel-solid); color: var(--text); }
+
+  .exzenor-badge {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 4px 10px 4px 5px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, rgba(190, 20, 35, 0.22), rgba(25, 28, 36, 0.6));
+    border: 1px solid rgba(220, 45, 60, 0.4);
+  }
+  .exzenor-logo-img {
+    height: 32px;
+    width: 32px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .exzenor-meta { display: flex; flex-direction: column; line-height: 1.15; }
+  .exzenor-meta strong { font-size: 12px; letter-spacing: 0.6px; color: var(--text); }
+  .exzenor-meta span { font-size: 10px; color: var(--muted); }
+
+  /* Ana Grid & Paneller */
+  .grid {
+    display: grid;
+    grid-template-columns: 365px 1fr;
+    gap: 16px;
+  }
+  .panel {
+    background: var(--panel);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+    transition: background .2s, border-color .2s;
+  }
+  h3 { margin: 14px 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--title); }
+  label { display: block; font-size: 12px; color: var(--muted); margin-top: 9px; }
+  input, select {
+    width: 100%; margin-top: 4px; padding: 7px 9px;
+    background: var(--input-bg); color: var(--text);
+    border: 1px solid var(--input-border); border-radius: 6px;
+    outline: none; transition: border-color .15s;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+  input[type="checkbox"] { width: auto; margin-right: 6px; vertical-align: middle; }
+  .chk { display: flex; align-items: center; margin-top: 10px; font-size: 12px; color: var(--text); cursor: pointer; }
+  .row { display: flex; gap: 8px; }
+  .row > div { flex: 1; }
+  button.btn {
+    margin-top: 10px; padding: 9px 12px; border: 0; border-radius: 6px;
+    cursor: pointer; font-weight: 600; background: var(--accent); color: #fff;
+    width: 100%; transition: opacity .15s, transform .1s;
+  }
+  button.btn:hover { opacity: 0.92; transform: translateY(-1px); }
+  button.btn.sec { background: var(--sec-bg); color: var(--text); }
+  button.btn.sec:hover { background: var(--sec-hover); }
+  .preview-wrap {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 360px; border-radius: 8px; border: 1px dashed var(--border);
+    overflow: auto; padding: 14px;
+  }
+  canvas { image-rendering: pixelated; max-width: 100%; }
+  textarea {
+    width: 100%; height: 155px; margin-top: 10px;
+    background: var(--out-bg); color: var(--out-text);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px;
+    border: 1px solid var(--border); border-radius: 6px; padding: 10px;
+  }
+  .stats { font-size: 12px; color: var(--title); margin-top: 8px; display: flex; justify-content: space-between; font-weight: 600; }
+  .alert { margin-top: 10px; padding: 10px 12px; border-radius: 7px; font-size: 13px; line-height: 1.45; }
+  .alert.ok { background: var(--ok-bg); border: 1px solid var(--ok-bd); color: var(--ok-tx); }
+  .alert.warn { background: var(--warn-bg); border: 1px solid var(--warn-bd); color: var(--warn-tx); }
+  .alert.crit { background: var(--crit-bg); border: 1px solid var(--crit-bd); color: var(--crit-tx); }
+
+  /* Footer / Alt Bilgi Alanı */
+  .footer {
+    background: var(--panel);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .footer-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .footer-disclaimer { flex: 1; min-width: 260px; }
+  .footer-disclaimer strong { color: var(--text); }
+  .footer-credit {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+    gap: 2px;
+  }
+  .footer-credit strong { color: var(--title); font-size: 12.5px; }
+  .footer-bottom {
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 11px;
+  }
+  .ai-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* Görsel Yükleme Modalı (Opsiyonel Marka Özelleştirme) */
+  .modal-backdrop {
+    display: none; position: fixed; inset: 0; z-index: 50;
+    background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center; padding: 16px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-card {
+    background: var(--panel-solid); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px; width: 100%; max-width: 420px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+  }
+  .modal-card h3 { margin-top: 0; }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; }
+    .footer-credit { align-items: flex-start; text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Arka Plan Filigranı: SP2 Türkiye -->
+<div class="bg-watermark">
+  <img id="wmImg" src="sp2-tr-bg.png" alt="SimplePlanes 2 Türkiye">
+</div>
+
+<div class="app-shell">
+  <!-- Üst Menü -->
+  <header class="navbar">
+    <div class="brand-left">
+      <img id="sp2LogoImg" class="sp2-logo-img" src="sp2-logo.png" alt="SimplePlanes 2">
+      <div class="brand-divider"></div>
+      <div class="brand-title-wrap">
+        <h1 class="brand-name">RichText Studio</h1>
+        <span class="brand-sub" id="brandSub">Creative Label & HUD Image Converter</span>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <div class="tools">
+        <div class="lang-wrap" title="Language">
+          <span>🌐</span>
+          <select id="langSel" onchange="changeLang(this.value)">
+            <option value="en">EN</option>
+            <option value="tr">TR</option>
+            <option value="ru">RU</option>
+            <option value="zh">中文</option>
+            <option value="fr">FR</option>
+            <option value="de">DE</option>
+          </select>
+        </div>
+
+        <label class="color-tool" id="lblBtnCol" title="Button / Accent Color" style="margin:0; cursor:pointer;">
+          <span id="txtBtnCol">Btn</span>
+          <input type="color" id="accentPick" value="#2b7de9" onchange="changeAccent(this.value)">
+        </label>
+
+        <label class="color-tool" id="lblTxtCol" title="Text Color" style="margin:0; cursor:pointer;">
+          <span id="txtTextCol">Text</span>
+          <input type="color" id="textPick" value="#e6eaf2" onchange="changeTextColor(this.value)">
+        </label>
+
+        <button class="icon-btn" id="brandBtn" onclick="toggleBrandModal(true)" title="Logo / Watermark Setup">🖼️</button>
+        <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Dark / Light Mode">🌙</button>
+      </div>
+
+      <div class="exzenor-badge">
+        <img id="exzLogoImg" class="exzenor-logo-img" src="exzenor-logo.png" alt="Exzenor">
+        <div class="exzenor-meta">
+          <strong>EXZENOR</strong>
+          <span id="exzSub">SP2 Türkiye</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Ana İçerik -->
+  <div class="grid">
+    <div class="panel">
+      <label id="lblFile" style="margin-top:0;"></label>
+      <input type="file" id="f" accept="image/*">
+      <button class="btn" id="btnLoad" onclick="loadImg()"></button>
+
+      <div class="row">
+        <div>
+          <label id="lblImgW"></label>
+          <input type="number" id="w" value="48" min="4" max="150">
+        </div>
+        <div>
+          <label id="lblScale"></label>
+          <select id="smooth">
+            <option value="0" id="optSharp"></option>
+            <option value="1" selected id="optSmooth"></option>
+          </select>
+        </div>
+      </div>
+
+      <label class="chk"><input type="checkbox" id="trim" checked> <span id="lblTrim"></span></label>
+
+      <label id="lblMode"></label>
+      <select id="mode" onchange="onModeChange()">
+        <option value="dot" id="mDot"></option>
+        <option value="block" id="mBlock"></option>
+        <option value="circle" id="mCircle"></option>
+        <option value="square" id="mSquare"></option>
+        <option value="ascii_color" id="mAsciiC"></option>
+        <option value="ascii_mono" id="mAsciiM"></option>
+      </select>
+
+      <div class="row">
+        <div>
+          <label id="lblCsize"></label>
+          <input type="number" id="csize" value="11.2" step="0.05" min="0.5" max="20">
+        </div>
+        <div>
+          <label id="lblTol"></label>
+          <input type="number" id="tol" value="12" min="0" max="100">
+        </div>
+      </div>
+
+      <h3 id="hdrBox"></h3>
+      <div class="row">
+        <div>
+          <label id="lblLW"></label>
+          <input type="number" id="lw" value="5" step="0.1" min="0.1">
+        </div>
+        <div>
+          <label id="lblLH"></label>
+          <input type="number" id="lh" value="2.5" step="0.1" min="0.1">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label id="lblBg"></label>
+          <select id="bg" onchange="updateBg()">
+            <option value="sky" id="bgSky"></option>
+            <option value="dark" selected id="bgDark"></option>
+            <option value="light" id="bgLight"></option>
+            <option value="checker" id="bgCheck"></option>
+          </select>
+        </div>
+        <div>
+          <label id="lblZoom"></label>
+          <input type="number" id="zoom" value="8" min="2" max="20">
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn" id="btnCopySp2" onclick="copyOut(false, this)"></button>
+        <button class="btn sec" id="btnCopyXml" onclick="copyOut(true, this)"></button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3 id="hdrPrev" style="margin-top:0;"></h3>
+      <div id="pwrap" class="preview-wrap" style="background:#15181e;">
+        <canvas id="prev"></canvas>
+      </div>
+      <div id="fitBox" class="alert ok" style="display:none;"></div>
+      <div id="perfBox" class="alert warn" style="display:none;"></div>
+      <div class="stats">
+        <span id="statDim"></span>
+        <span id="statLen">0</span>
+      </div>
+      <textarea id="out" readonly></textarea>
+    </div>
+  </div>
+
+  <!-- Alt Bilgi / Yasal Uyarı -->
+  <footer class="footer">
+    <div class="footer-top">
+      <div class="footer-disclaimer" id="footerWarn"></div>
+      <div class="footer-credit">
+        <strong id="footerRole"></strong>
+        <span>SimplePlanes 2 Türkiye • EST. 2024</span>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="ai-pill" id="footerAi"></span>
+      <span>SP2 RichText Studio</span>
+    </div>
+  </footer>
+</div>
+
+<!-- Marka Görselleri Yükleme Penceresi -->
+<div class="modal-backdrop" id="brandModal" onclick="if(event.target===this)toggleBrandModal(false)">
+  <div class="modal-card">
+    <h3 id="mdlTitle">Brand Images (Saved Locally)</h3>
+    <label>SimplePlanes 2 Logo (sp2-logo.png)</label>
+    <input type="file" accept="image/*" onchange="saveBrandAsset('sp2_asset_logo', 'sp2LogoImg', this)">
+    <label>Exzenor Logo (exzenor-logo.png)</label>
+    <input type="file" accept="image/*" onchange="saveBrandAsset('sp2_asset_exz', 'exzLogoImg', this)">
+    <label>SP2 Türkiye Watermark (sp2-tr-bg.png)</label>
+    <input type="file" accept="image/*" onchange="saveBrandAsset('sp2_asset_wm', 'wmImg', this)">
+    <div class="row" style="margin-top:12px;">
+      <button class="btn sec" onclick="resetBrandAssets()" id="btnResetAssets">Reset Default</button>
+      <button class="btn" onclick="toggleBrandModal(false)" id="btnCloseMdl">OK</button>
+    </div>
+  </div>
+</div>
+
+<canvas id="work" style="display:none"></canvas>
+<script>
+// Harici PNG dosyaları klasörde yoksa devreye giren yerleşik SVG yedekleri
+const FALLBACK_SP2 = 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 96"><polygon points="6,24 314,24 282,42 38,42" fill="#0095ff"/><polygon points="28,46 292,46 274,56 46,56" fill="#e52521"/><polygon points="92,60 228,60 206,82 114,82" fill="#e52521"/><text x="160" y="42" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-style="italic" font-size="25" fill="#ffffff">SimplePlanes</text><text x="160" y="80" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="28" fill="#ffffff" stroke="#111" stroke-width="2">2</text></svg>`);
+const FALLBACK_EXZ = 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e11d2e"/><stop offset="100%" stop-color="#6b0710"/></linearGradient></defs><rect width="100" height="100" rx="18" fill="url(#g)"/><circle cx="38" cy="34" r="16" fill="#fff"/><circle cx="43" cy="34" r="13" fill="#b91220"/><polygon points="58,26 60,32 66,32 61,36 63,42 58,38 53,42 55,36 50,32 56,32" fill="#fff"/><text x="50" y="76" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="18" fill="#ffffff">EXZENOR</text></svg>`);
+const FALLBACK_WM = 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><circle cx="200" cy="200" r="175" fill="#a81320" stroke="#e2e8f0" stroke-width="10"/><circle cx="185" cy="200" r="88" fill="#ffffff"/><circle cx="206" cy="200" r="72" fill="#a81320"/><polygon points="278,162 287,188 314,188 292,204 300,230 278,214 256,230 264,204 242,188 269,188" fill="#ffffff"/><text x="200" y="330" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="24" fill="#ffffff">SIMPLEPLANES 2</text><text x="200" y="356" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="16" fill="#f1f5f9">TÜRKİYE</text></svg>`);
+
+function bindAsset(imgId, storageKey, defaultSrc, fallbackSrc) {
+  const el = document.getElementById(imgId);
+  el.onerror = function() {
+    if (el.src !== fallbackSrc) el.src = fallbackSrc;
+  };
+  const saved = localStorage.getItem(storageKey);
+  el.src = saved || defaultSrc;
+}
+
+function saveBrandAsset(storageKey, imgId, input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      localStorage.setItem(storageKey, ev.target.result);
+      document.getElementById(imgId).src = ev.target.result;
+    } catch (e) {
+      alert('Image too large for browser storage. Place PNG file next to HTML instead.');
+    }
+  };
+  r.readAsDataURL(file);
+}
+
+function resetBrandAssets() {
+  localStorage.removeItem('sp2_asset_logo');
+  localStorage.removeItem('sp2_asset_exz');
+  localStorage.removeItem('sp2_asset_wm');
+  initAssets();
+}
+
+function toggleBrandModal(open) {
+  document.getElementById('brandModal').classList.toggle('open', open);
+}
+
+function initAssets() {
+  bindAsset('sp2LogoImg', 'sp2_asset_logo', 'sp2-logo.png', FALLBACK_SP2);
+  bindAsset('exzLogoImg', 'sp2_asset_exz', 'exzenor-logo.png', FALLBACK_EXZ);
+  bindAsset('wmImg', 'sp2_asset_wm', 'sp2-tr-bg.png', FALLBACK_WM);
+}
+
+const I18N = {
+  en: {
+    brandSub: 'Creative Label & HUD Image Converter', btnCol: 'Btn', txtCol: 'Text',
+    file: 'Select Image (PNG / JPG / WEBP)', load: 'Load / Convert Image',
+    imgW: 'Image Width (px)', scale: 'Scaling', sharp: 'Crisp (Pixel / Reticle)', smooth: 'Smooth (Photo / Flag)',
+    trim: 'Auto-Trim transparent borders', mode: 'Draw Mode / Character',
+    mDot: 'Dot Pixel (.) — Smoothest (11.2em)', mBlock: 'Full Block (█) — Seamless (1.75em)',
+    mCircle: 'Round Dot (•) — (3.4em)', mSquare: 'Square Pixel (■) — (1.9em)',
+    mAsciiC: 'ASCII Art (Color)', mAsciiM: 'ASCII Art (Mono)',
+    csize: 'Character Size (em)', tol: 'Color Merge (Save Chars)',
+    hdrBox: 'Label Box Dimensions', lw: 'Label Width', lh: 'Label Height',
+    bg: 'Preview Background', bgSky: 'SP2 Sky', bgDark: 'Dark Cockpit', bgLight: 'Light / Runway', bgCheck: 'Transparent Checker',
+    zoom: 'Preview Zoom', copySp2: 'Copy SP2', copyXml: 'Copy XML', copied: 'Copied!',
+    hdrPrev: 'In-Game Preview', outPh: 'Generated RichText code will appear here...',
+    wait: 'Select an image and click Load...', pickFirst: 'Please select an image file first.',
+    loading: 'Loading image...', errRead: 'Error: Could not read image.', emptyImg: 'Image is completely transparent!',
+    chars: 'chars', dim: 'Used Pixels', raw: 'Raw',
+    fitOk: (cw, ch, uw, uh) => `<b>Fits Current Box</b> (Capacity: ${cw} × ${ch} px | Used: ${uw} × ${uh} px)`,
+    fitNo: (lw, lh, cw, ch, uw, uh, rw, rh) => `<b>Doesn't Fit Label (${lw} × ${lh})!</b> (Capacity: ${cw} × ${ch} px | Used: ${uw} × ${uh} px)<br>In Overload, set <code>Label.State</code> to at least <b>width="${rw}"</b> and <b>height="${rh}"</b>.`,
+    p20: '<b>20,000+ chars:</b> May lag on potato PCs.',
+    p100: '<b>100,000+ chars:</b> The game may lag heavily!',
+    p200: '<b>200,000+ chars:</b> Dude calm down, it\'s not worth burning your PC for one picture!',
+    footerWarn: '<strong>Disclaimer:</strong> This tool is designed for players who want to build creative things in-game. Any misuse of this application is solely the user\'s responsibility; we assume no liability whatsoever.',
+    footerRole: 'SimplePlanes Türkiye Community Admin: Exzenor',
+    footerAi: '🤖 Built with AI assistance during development'
+  },
+  tr: {
+    brandSub: 'Yaratıcı Label & HUD Görsel Dönüştürücü', btnCol: 'Buton', txtCol: 'Yazı',
+    file: 'Görsel Seç (PNG / JPG / WEBP)', load: 'Görseli Yükle / Dönüştür',
+    imgW: 'Görsel Genişlik (px)', scale: 'Ölçekleme', sharp: 'Keskin (Piksel/Nişangah)', smooth: 'Yumuşak (Fotoğraf/Bayrak)',
+    trim: 'Kenar şeffaf boşluklarını kırp (Auto-Trim)', mode: 'Çizim Modu / Karakter',
+    mDot: 'Nokta Piksel (.) — En Pürüzsüz (11.2em)', mBlock: 'Tam Blok (█) — Çizgisiz (1.75em)',
+    mCircle: 'Yuvarlak Boncuk (•) — (3.4em)', mSquare: 'Kare Piksel (■) — (1.9em)',
+    mAsciiC: 'ASCII Sanat (Renkli)', mAsciiM: 'ASCII Sanat (Tek Renk)',
+    csize: 'Karakter Boyutu (em)', tol: 'Renk Birleştirme (Tasarruf)',
+    hdrBox: 'Label Kutu Ölçüleri', lw: 'Label Width', lh: 'Label Height',
+    bg: 'Önizleme Arka Planı', bgSky: 'SP2 Gökyüzü', bgDark: 'Koyu Kokpit', bgLight: 'Açık / Pist', bgCheck: 'Şeffaf Damalı',
+    zoom: 'Önizleme Yakınlaştırma', copySp2: 'SP2 Kopyala', copyXml: 'XML Kopyala', copied: 'Kopyalandı!',
+    hdrPrev: 'Oyun İçi Görünüm Önizlemesi', outPh: 'Üretilen RichText kodu burada görünecek...',
+    wait: 'Görsel seçip butona basın...', pickFirst: 'Lütfen önce bir görsel dosyası seçin.',
+    loading: 'Görsel yükleniyor...', errRead: 'Hata: Görsel okunamadı.', emptyImg: 'Görsel tamamen şeffaf!',
+    chars: 'karakter', dim: 'Dolu Piksel', raw: 'Ham',
+    fitOk: (cw, ch, uw, uh) => `<b>Mevcut Kutuya Tam Sığar</b> (Kapasite: ${cw} × ${ch} px | Dolu Alan: ${uw} × ${uh} px)`,
+    fitNo: (lw, lh, cw, ch, uw, uh, rw, rh) => `<b>Mevcut Label (${lw} × ${lh}) İçine Sığmıyor!</b> (Kapasite: ${cw} × ${ch} px | Dolu Alan: ${uw} × ${uh} px)<br>Overload içinden <code>Label.State</code> değerlerini en az <b>width="${rw}"</b> ve <b>height="${rh}"</b> yapın.`,
+    p20: '<b>20.000+ karakter:</b> Patates bilgisayarlarda kasabilir.',
+    p100: '<b>100.000+ karakter:</b> Oyun kasabilir!',
+    p200: '<b>200.000+ karakter:</b> Adamım sakin ol, bir resim için PC yakmaya değmez!',
+    footerWarn: '<strong>Bilgilendirme & Sorumluluk Reddi:</strong> Bu uygulama oyunda creative (yaratıcı) şeyler yapmak isteyen kişiler için tasarlanmıştır. Uygulamanın kötüye kullanımı tamamen kişiye aittir; hiçbir şekilde sorumlu değiliz.',
+    footerRole: 'SimplePlanes Türkiye Topluluğu Yöneticisi: Exzenor',
+    footerAi: '🤖 Uygulama geliştirilmesinde yapay zeka desteği de alınmıştır'
+  },
+  ru: {
+    brandSub: 'Конвертер изображений для Label и HUD', btnCol: 'Кноп.', txtCol: 'Текст',
+    file: 'Выберите изображение (PNG / JPG / WEBP)', load: 'Загрузить / Конвертировать',
+    imgW: 'Ширина (px)', scale: 'Сглаживание', sharp: 'Чёткое (Пиксель-арт)', smooth: 'Мягкое (Фото / Флаг)',
+    trim: 'Обрезать прозрачные края (Auto-Trim)', mode: 'Режим рисования / Символ',
+    mDot: 'Точка (.) — Самый гладкий (11.2em)', mBlock: 'Блок (█) — Без полос (1.75em)',
+    mCircle: 'Круг (•) — (3.4em)', mSquare: 'Квадрат (■) — (1.9em)',
+    mAsciiC: 'ASCII Арт (Цветной)', mAsciiM: 'ASCII Арт (Моно)',
+    csize: 'Размер символа (em)', tol: 'Слияние цветов (Экономия)',
+    hdrBox: 'Размеры Label', lw: 'Label Width', lh: 'Label Height',
+    bg: 'Фон предпросмотра', bgSky: 'Небо SP2', bgDark: 'Тёмная кабина', bgLight: 'Светлый / ВПП', bgCheck: 'Прозрачная сетка',
+    zoom: 'Масштаб предпросмотра', copySp2: 'Копировать SP2', copyXml: 'Копировать XML', copied: 'Скопировано!',
+    hdrPrev: 'Предпросмотр в игре', outPh: 'Код RichText появится здесь...',
+    wait: 'Выберите изображение и нажмите кнопку...', pickFirst: 'Сначала выберите файл изображения.',
+    loading: 'Загрузка...', errRead: 'Ошибка чтения изображения.', emptyImg: 'Изображение полностью прозрачное!',
+    chars: 'симв.', dim: 'Занято пикселей', raw: 'Исходн.',
+    fitOk: (cw, ch, uw, uh) => `<b>Помещается в рамку</b> (Вместимость: ${cw} × ${ch} px | Занято: ${uw} × ${uh} px)`,
+    fitNo: (lw, lh, cw, ch, uw, uh, rw, rh) => `<b>Не помещается в Label (${lw} × ${lh})!</b> (Вместимость: ${cw} × ${ch} px | Занято: ${uw} × ${uh} px)<br>В Overload задайте для <code>Label.State</code> минимум <b>width="${rw}"</b> и <b>height="${rh}"</b>.`,
+    p20: '<b>20 000+ символов:</b> Может тормозить на слабых ПК.',
+    p100: '<b>100 000+ символов:</b> Игра может сильно тормозить!',
+    p200: '<b>200 000+ символов:</b> Остынь, чувак, не стоит сжигать ПК ради одной картинки!',
+    footerWarn: '<strong>Отказ от ответственности:</strong> Приложение создано для творческих проектов в игре. За любое неправомерное использование ответственность несёт исключительно пользователь.',
+    footerRole: 'Администратор сообщества SimplePlanes Türkiye: Exzenor',
+    footerAi: '🤖 При разработке использовалась поддержка ИИ'
+  },
+  zh: {
+    brandSub: '创意 Label 与 HUD 图像转换器', btnCol: '按钮', txtCol: '文字',
+    file: '选择图片 (PNG / JPG / WEBP)', load: '加载 / 转换图片',
+    imgW: '图片宽度 (px)', scale: '缩放模式', sharp: '锐利 (像素画/准星)', smooth: '平滑 (照片/旗帜)',
+    trim: '自动裁剪透明边缘 (Auto-Trim)', mode: '绘制模式 / 字符',
+    mDot: '圆点像素 (.) — 最平滑 (11.2em)', mBlock: '实心方块 (█) — 无缝隙 (1.75em)',
+    mCircle: '圆珠 (•) — (3.4em)', mSquare: '小方块 (■) — (1.9em)',
+    mAsciiC: 'ASCII 字符画 (彩色)', mAsciiM: 'ASCII 字符画 (单色)',
+    csize: '字符大小 (em)', tol: '颜色合并容差 (省字符)',
+    hdrBox: 'Label 文本框尺寸', lw: 'Label Width', lh: 'Label Height',
+    bg: '预览背景', bgSky: 'SP2 天空', bgDark: '深色座舱', bgLight: '浅色 / 跑道', bgCheck: '透明棋盘格',
+    zoom: '预览缩放', copySp2: '复制 SP2', copyXml: '复制 XML', copied: '已复制!',
+    hdrPrev: '游戏内效果预览', outPh: '生成的 RichText 代码将显示在这里...',
+    wait: '请选择图片并点击加载...', pickFirst: '请先选择一张图片。',
+    loading: '正在加载图片...', errRead: '错误：无法读取图片。', emptyImg: '图片完全透明！',
+    chars: '字符', dim: '有效像素', raw: '原始',
+    fitOk: (cw, ch, uw, uh) => `<b>完全适配当前框</b> (容量: ${cw} × ${ch} px | 有效: ${uw} × ${uh} px)`,
+    fitNo: (lw, lh, cw, ch, uw, uh, rw, rh) => `<b>超出 Label (${lw} × ${lh}) 范围！</b> (容量: ${cw} × ${ch} px | 有效: ${uw} × ${uh} px)<br>请在 Overload 中将 <code>Label.State</code> 至少设为 <b>width="${rw}"</b> 和 <b>height="${rh}"</b>。`,
+    p20: '<b>20,000+ 字符：</b> 土豆电脑可能会卡顿。',
+    p100: '<b>100,000+ 字符：</b> 游戏可能会严重卡顿！',
+    p200: '<b>200,000+ 字符：</b> 冷静点老兄，为了一张图烧掉电脑不值得！',
+    footerWarn: '<strong>免责声明：</strong> 本工具专为希望在游戏中发挥创意的玩家设计。任何滥用行为均由使用者本人承担全部责任，开发者不承担任何责任。',
+    footerRole: 'SimplePlanes Türkiye 社区管理员：Exzenor',
+    footerAi: '🤖 开发过程中使用了人工智能 (AI) 辅助'
+  },
+  fr: {
+    brandSub: 'Convertisseur créatif Label & HUD', btnCol: 'Btn', txtCol: 'Texte',
+    file: 'Choisir une image (PNG / JPG / WEBP)', load: 'Charger / Convertir',
+    imgW: 'Largeur (px)', scale: 'Mise à l\'échelle', sharp: 'Net (Pixel / Réticule)', smooth: 'Lisse (Photo / Drapeau)',
+    trim: 'Rogner les bords transparents (Auto-Trim)', mode: 'Mode de dessin / Caractère',
+    mDot: 'Point (.) — Le plus lisse (11.2em)', mBlock: 'Bloc plein (█) — Sans lignes (1.75em)',
+    mCircle: 'Rond (•) — (3.4em)', mSquare: 'Carré (■) — (1.9em)',
+    mAsciiC: 'Art ASCII (Couleur)', mAsciiM: 'Art ASCII (Mono)',
+    csize: 'Taille du caractère (em)', tol: 'Fusion des couleurs',
+    hdrBox: 'Dimensions du Label', lw: 'Label Width', lh: 'Label Height',
+    bg: 'Arrière-plan', bgSky: 'Ciel SP2', bgDark: 'Cockpit sombre', bgLight: 'Clair / Piste', bgCheck: 'Damier transparent',
+    zoom: 'Zoom aperçu', copySp2: 'Copier SP2', copyXml: 'Copier XML', copied: 'Copié !',
+    hdrPrev: 'Aperçu en jeu', outPh: 'Le code RichText apparaîtra ici...',
+    wait: 'Choisissez une image et cliquez sur Charger...', pickFirst: 'Veuillez d\'abord choisir une image.',
+    loading: 'Chargement...', errRead: 'Erreur de lecture de l\'image.', emptyImg: 'L\'image est totalement transparente !',
+    chars: 'caract.', dim: 'Pixels utilisés', raw: 'Brut',
+    fitOk: (cw, ch, uw, uh) => `<b>Rentre dans la boîte</b> (Capacité : ${cw} × ${ch} px | Utilisé : ${uw} × ${uh} px)`,
+    fitNo: (lw, lh, cw, ch, uw, uh, rw, rh) => `<b>Dépasse le Label (${lw} × ${lh}) !</b> (Capacité : ${cw} × ${ch} px | Utilisé : ${uw} × ${uh} px)<br>Dans Overload, réglez <code>Label.State</code> au moins sur <b>width="${rw}"</b> et <b>height="${rh}"</b>.`,
+    p20: '<b>20 000+ caractères :</b> Peut ramer sur un PC patate.',
+    p100: '<b>100 000+ caractères :</b> Le jeu risque de ramer !',
+    p200: '<b>200 000+ caractères :</b> Calme-toi mec, ça ne vaut pas le coup de griller ton PC pour une image !',
+    footerWarn: '<strong>Avertissement :</strong> Cet outil est conçu pour les joueurs souhaitant créer du contenu créatif en jeu. Toute mauvaise utilisation relève exclusivement de la responsabilité de l\'utilisateur.',
+    footerRole: 'Administrateur SimplePlanes Türkiye : Exzenor',
+    footerAi: '🤖 Développé avec l\'assistance de l\'IA'
+  },
+  de: {
+    brandSub: 'Kreativer Label- & HUD-Bildkonverter', btnCol: 'Btn', txtCol: 'Text',
+    file: 'Bild wählen (PNG / JPG / WEBP)', load: 'Bild laden / konvertieren',
+    imgW: 'Bildbreite (px)', scale: 'Skalierung', sharp: 'Scharf (Pixel / Fadenkreuz)', smooth: 'Weich (Foto / Flagge)',
+    trim: 'Transparente Ränder zuschneiden (Auto-Trim)', mode: 'Zeichenmodus / Symbol',
+    mDot: 'Punkt (.) — Am glattesten (11.2em)', mBlock: 'Vollblock (█) — Lückenlos (1.75em)',
+    mCircle: 'Kreis (•) — (3.4em)', mSquare: 'Quadrat (■) — (1.9em)',
+    mAsciiC: 'ASCII-Kunst (Farbe)', mAsciiM: 'ASCII-Kunst (Mono)',
+    csize: 'Zeichengröße (em)', tol: 'Farbzusammenführung',
+    hdrBox: 'Label-Abmessungen', lw: 'Label Width', lh: 'Label Height',
+    bg: 'Vorschau-Hintergrund', bgSky: 'SP2 Himmel', bgDark: 'Dunkles Cockpit', bgLight: 'Hell / Landebahn', bgCheck: 'Schachbrett',
+    zoom: 'Vorschau-Zoom', copySp2: 'SP2 kopieren', copyXml: 'XML kopieren', copied: 'Kopiert!',
+    hdrPrev: 'Vorschau im Spiel', outPh: 'Der generierte RichText-Code erscheint hier...',
+    wait: 'Bild wählen und auf Laden klicken...', pickFirst: 'Bitte zuerst eine Bilddatei auswählen.',
+    loading: 'Bild wird geladen...', errRead: 'Fehler: Bild konnte nicht gelesen werden.', emptyImg: 'Bild ist komplett transparent!',
+    chars: 'Zeichen', dim: 'Genutzte Pixel', raw: 'Roh',
+    fitOk: (cw, ch, uw, uh) => `<b>Passt in das Feld</b> (Kapazität: ${cw} × ${ch} px | Genutzt: ${uw} × ${uh} px)`,
+    fitNo: (lw, lh, cw, ch, uw, uh, rw, rh) => `<b>Passt nicht in Label (${lw} × ${lh})!</b> (Kapazität: ${cw} × ${ch} px | Genutzt: ${uw} × ${uh} px)<br>Stelle in Overload <code>Label.State</code> mindestens auf <b>width="${rw}"</b> und <b>height="${rh}"</b>.`,
+    p20: '<b>20.000+ Zeichen:</b> Kann auf Kartoffel-PCs ruckeln.',
+    p100: '<b>100.000+ Zeichen:</b> Das Spiel kann stark ruckeln!',
+    p200: '<b>200.000+ Zeichen:</b> Bleib ruhig Kumpel, für ein Bild lohnt es sich nicht, den PC abzufackeln!',
+    footerWarn: '<strong>Haftungsausschluss:</strong> Dieses Tool wurde für kreative Projekte im Spiel entwickelt. Jeglicher Missbrauch liegt allein in der Verantwortung des Nutzers; wir übernehmen keinerlei Haftung.',
+    footerRole: 'SimplePlanes Türkiye Community-Admin: Exzenor',
+    footerAi: '🤖 Mit KI-Unterstützung entwickelt'
+  }
+};
+
+let lang = localStorage.getItem('sp2_lang') || 'tr';
+if (!I18N[lang]) lang = 'en';
+let isLight = localStorage.getItem('sp2_theme') === 'light';
+let accent = localStorage.getItem('sp2_accent') || '#2b7de9';
+let textColDark = localStorage.getItem('sp2_text_dark') || '#e6eaf2';
+let textColLight = localStorage.getItem('sp2_text_light') || '#1b222c';
+let loadedImg = null;
+const ASCII_RAMP = ' .:-=+*#%@';
+const hex2 = n => n.toString(16).padStart(2, '0').toUpperCase();
+
+function applyTheme() {
+  document.body.classList.toggle('light', isLight);
+  document.getElementById('themeBtn').textContent = isLight ? '☀️' : '🌙';
+  document.documentElement.style.setProperty('--accent', accent);
+  document.getElementById('accentPick').value = accent;
+
+  const activeText = isLight ? textColLight : textColDark;
+  document.documentElement.style.setProperty('--text', activeText);
+  document.getElementById('textPick').value = activeText;
+}
+
+function toggleTheme() {
+  isLight = !isLight;
+  localStorage.setItem('sp2_theme', isLight ? 'light' : 'dark');
+  applyTheme();
+}
+
+function changeAccent(val) {
+  accent = val;
+  localStorage.setItem('sp2_accent', val);
+  applyTheme();
+}
+
+function changeTextColor(val) {
+  if (isLight) {
+    textColLight = val;
+    localStorage.setItem('sp2_text_light', val);
+  } else {
+    textColDark = val;
+    localStorage.setItem('sp2_text_dark', val);
+  }
+  applyTheme();
+}
+
+function applyLang() {
+  const t = I18N[lang];
+  document.getElementById('langSel').value = lang;
+  document.getElementById('brandSub').textContent = t.brandSub;
+  document.getElementById('txtBtnCol').textContent = t.btnCol;
+  document.getElementById('txtTextCol').textContent = t.txtCol;
+  document.getElementById('lblFile').textContent = t.file;
+  document.getElementById('btnLoad').textContent = t.load;
+  document.getElementById('lblImgW').textContent = t.imgW;
+  document.getElementById('lblScale').textContent = t.scale;
+  document.getElementById('optSharp').textContent = t.sharp;
+  document.getElementById('optSmooth').textContent = t.smooth;
+  document.getElementById('lblTrim').textContent = t.trim;
+  document.getElementById('lblMode').textContent = t.mode;
+  document.getElementById('mDot').textContent = t.mDot;
+  document.getElementById('mBlock').textContent = t.mBlock;
+  document.getElementById('mCircle').textContent = t.mCircle;
+  document.getElementById('mSquare').textContent = t.mSquare;
+  document.getElementById('mAsciiC').textContent = t.mAsciiC;
+  document.getElementById('mAsciiM').textContent = t.mAsciiM;
+  document.getElementById('lblCsize').textContent = t.csize;
+  document.getElementById('lblTol').textContent = t.tol;
+  document.getElementById('hdrBox').textContent = t.hdrBox;
+  document.getElementById('lblLW').textContent = t.lw;
+  document.getElementById('lblLH').textContent = t.lh;
+  document.getElementById('lblBg').textContent = t.bg;
+  document.getElementById('bgSky').textContent = t.bgSky;
+  document.getElementById('bgDark').textContent = t.bgDark;
+  document.getElementById('bgLight').textContent = t.bgLight;
+  document.getElementById('bgCheck').textContent = t.bgCheck;
+  document.getElementById('lblZoom').textContent = t.zoom;
+  document.getElementById('btnCopySp2').textContent = t.copySp2;
+  document.getElementById('btnCopyXml').textContent = t.copyXml;
+  document.getElementById('hdrPrev').textContent = t.hdrPrev;
+  document.getElementById('out').placeholder = t.outPh;
+  document.getElementById('footerWarn').innerHTML = t.footerWarn;
+  document.getElementById('footerRole').textContent = t.footerRole;
+  document.getElementById('footerAi').textContent = t.footerAi;
+  if (!loadedImg) {
+    document.getElementById('statDim').textContent = t.wait;
+    document.getElementById('statLen').textContent = '0 ' + t.chars;
+  } else {
+    render();
+  }
+}
+
+function changeLang(l) {
+  lang = l;
+  localStorage.setItem('sp2_lang', l);
+  applyLang();
+}
+
+document.getElementById('f').addEventListener('change', loadImg);
+['w','smooth','trim','csize','tol','lw','lh','zoom'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => { if (loadedImg) render(); });
+  document.getElementById(id).addEventListener('change', () => { if (loadedImg) render(); });
+});
+
+function shortColor(r, g, b, a) {
+  if (a === 255) {
+    const R = hex2(r), G = hex2(g), B = hex2(b);
+    if (R[0]===R[1] && G[0]===G[1] && B[0]===B[1]) return '#' + R[0] + G[0] + B[0];
+    return '#' + R + G + B;
+  }
+  return '#' + hex2(r) + hex2(g) + hex2(b) + hex2(a);
+}
+
+function onModeChange() {
+  const m = document.getElementById('mode').value;
+  const sizes = { dot: 11.2, block: 1.75, circle: 3.4, square: 1.9, ascii_color: 1.0, ascii_mono: 1.0 };
+  document.getElementById('csize').value = sizes[m];
+  if (loadedImg) render();
+}
+
+function updateBg() {
+  const bg = document.getElementById('bg').value;
+  const el = document.getElementById('pwrap');
+  if (bg === 'sky') el.style.background = 'linear-gradient(#5ea2e8, #b5d6f5)';
+  else if (bg === 'dark') el.style.background = '#15181e';
+  else if (bg === 'light') el.style.background = '#d8dce3';
+  else el.style.background = 'repeating-conic-gradient(#444 0% 25%, #2b2b2b 0% 50%) 50% / 16px 16px';
+}
+
+function loadImg() {
+  const t = I18N[lang];
+  const file = document.getElementById('f').files[0];
+  if (!file) { document.getElementById('statDim').textContent = t.pickFirst; return; }
+  document.getElementById('statDim').textContent = t.loading;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const img = new Image();
+    img.onload = function() { loadedImg = img; render(); };
+    img.onerror = function() { document.getElementById('statDim').textContent = t.errRead; };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function render() {
+  try {
+    if (!loadedImg) return;
+    const tr = I18N[lang];
+    const rawW = Math.max(4, Math.min(150, parseInt(document.getElementById('w').value, 10) || 48));
+    const rawH = Math.max(1, Math.round(loadedImg.height * (rawW / loadedImg.width)));
+    const mode = document.getElementById('mode').value;
+    const csize = parseFloat(document.getElementById('csize').value) || 1;
+    const tol = parseInt(document.getElementById('tol').value, 10) || 0;
+    const zoom = parseInt(document.getElementById('zoom').value, 10) || 8;
+    const smooth = document.getElementById('smooth').value === '1';
+    const doTrim = document.getElementById('trim').checked;
+    const lw = parseFloat(document.getElementById('lw').value) || 5;
+    const lh = parseFloat(document.getElementById('lh').value) || 2.5;
+
+    const work = document.getElementById('work'), wctx = work.getContext('2d');
+    work.width = rawW; work.height = rawH;
+    wctx.imageSmoothingEnabled = smooth;
+    wctx.clearRect(0, 0, rawW, rawH);
+    wctx.drawImage(loadedImg, 0, 0, rawW, rawH);
+    const d = wctx.getImageData(0, 0, rawW, rawH).data;
+
+    let minX = rawW, maxX = -1, minY = rawH, maxY = -1;
+    for (let y = 0; y < rawH; y++) {
+      for (let x = 0; x < rawW; x++) {
+        if (d[(y * rawW + x) * 4 + 3] >= 10) {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+
+    if (maxX === -1) {
+      document.getElementById('statDim').textContent = tr.emptyImg;
+      return;
+    }
+
+    const startX = doTrim ? minX : 0;
+    const startY = doTrim ? minY : 0;
+    const endX = doTrim ? maxX : rawW - 1;
+    const endY = doTrim ? maxY : rawH - 1;
+    const W = endX - startX + 1;
+    const H = endY - startY + 1;
+    const usedW = maxX - startX + 1;
+    const usedH = maxY - startY + 1;
+
+    const prev = document.getElementById('prev'), pctx = prev.getContext('2d');
+    prev.width = W * zoom; prev.height = H * zoom;
+    pctx.clearRect(0, 0, prev.width, prev.height);
+    if (mode.startsWith('ascii')) {
+      pctx.font = 'bold ' + zoom + 'px monospace';
+      pctx.textAlign = 'center';
+      pctx.textBaseline = 'middle';
+    }
+
+    let res = '<align=left><mspace=1.em><line-height=1.em>';
+    if (csize !== 1) res += '<size=' + csize + 'em>';
+    let lastCol = '', lr = -999, lg = -999, lb = -999, la = -999;
+
+    for (let y = startY; y <= endY; y++) {
+      let row = [], lastNonEmpty = -1;
+      for (let x = startX; x <= endX; x++) {
+        const i = (y * rawW + x) * 4;
+        let r = d[i], g = d[i+1], b = d[i+2], a = d[i+3];
+        if (a < 10) { row.push(null); continue; }
+        if (tol > 0 && Math.abs(r-lr)+Math.abs(g-lg)+Math.abs(b-lb)+Math.abs(a-la) <= tol) {
+          r = lr; g = lg; b = lb; a = la;
+        } else { lr = r; lg = g; lb = b; la = a; }
+        const lum = (0.299*r + 0.587*g + 0.114*b) / 255;
+        const ach = ASCII_RAMP[Math.min(ASCII_RAMP.length - 1, Math.floor(lum * ASCII_RAMP.length))];
+        row.push({ r, g, b, a, col: shortColor(r, g, b, a), ach });
+        lastNonEmpty = x - startX;
+      }
+
+      if (lastNonEmpty === -1) { if (y < endY) res += '<br>'; continue; }
+      let x = 0, spaces = 0;
+      while (x <= lastNonEmpty && row[x] === null) { spaces++; x++; }
+      if (spaces > 0) res += (csize !== 1) ? '<space=' + (spaces / csize).toFixed(6) + 'em>' : '<space=' + spaces + 'em>';
+
+      for (; x <= lastNonEmpty; x++) {
+        const p = row[x];
+        if (!p) { res += ' '; continue; }
+
+        pctx.fillStyle = mode === 'ascii_mono' ? 'rgba(220,235,255,' + (p.a/255) + ')' : 'rgba(' + p.r + ',' + p.g + ',' + p.b + ',' + (p.a/255) + ')';
+        const px = x * zoom, py = (y - startY) * zoom;
+        if (mode === 'dot') {
+          pctx.beginPath(); pctx.arc(px + zoom/2, py + zoom/2, zoom * 0.62, 0, Math.PI * 2); pctx.fill();
+        } else if (mode === 'circle') {
+          pctx.beginPath(); pctx.arc(px + zoom/2, py + zoom/2, zoom * 0.44, 0, Math.PI * 2); pctx.fill();
+        } else if (mode === 'square') {
+          pctx.fillRect(px + zoom*0.08, py + zoom*0.08, zoom*0.84, zoom*0.84);
+        } else if (mode === 'block') {
+          pctx.fillRect(px, py, zoom, zoom);
+        } else {
+          pctx.fillText(p.ach, px + zoom/2, py + zoom/2);
+        }
+
+        let ch = '.';
+        if (mode === 'circle') ch = '•';
+        else if (mode === 'square') ch = '■';
+        else if (mode === 'block') ch = '█';
+        else if (mode.startsWith('ascii')) ch = p.ach;
+
+        if (mode !== 'ascii_mono' && p.col !== lastCol) {
+          res += '<' + p.col + '>'; lastCol = p.col;
+        }
+        res += ch;
+      }
+      if (y < endY) res += '<br>';
+    }
+
+    const t = mode === 'dot' ? 1 : Math.max(0, Math.min(1, (csize - 1.05) / (10.5 - 1.05)));
+    const stepH = 0.10 + 0.05 * t;
+    const padH = 0.5 + 5.5 * t;
+    const capW = Math.max(0, Math.floor((10 * lw) - 1));
+    const capH = Math.max(0, Math.floor((lh / stepH) - padH));
+    const reqW = Math.ceil(((usedW + 1) / 10) * 100) / 100;
+    const reqH = Math.ceil(((usedH + padH) * stepH) * 100) / 100;
+
+    const fitBox = document.getElementById('fitBox');
+    fitBox.style.display = 'block';
+    if (usedW <= capW && usedH <= capH) {
+      fitBox.className = 'alert ok';
+      fitBox.innerHTML = tr.fitOk(capW, capH, usedW, usedH);
+    } else {
+      fitBox.className = 'alert warn';
+      fitBox.innerHTML = tr.fitNo(lw, lh, capW, capH, usedW, usedH, reqW, reqH);
+    }
+
+    const len = res.length;
+    const perfBox = document.getElementById('perfBox');
+    if (len > 200000) {
+      perfBox.style.display = 'block';
+      perfBox.className = 'alert crit';
+      perfBox.innerHTML = '🔥 ' + tr.p200;
+    } else if (len > 100000) {
+      perfBox.style.display = 'block';
+      perfBox.className = 'alert crit';
+      perfBox.innerHTML = '⚠️ ' + tr.p100;
+    } else if (len >= 20000) {
+      perfBox.style.display = 'block';
+      perfBox.className = 'alert warn';
+      perfBox.innerHTML = '🥔 ' + tr.p20;
+    } else {
+      perfBox.style.display = 'none';
+    }
+
+    document.getElementById('out').value = res;
+    document.getElementById('statDim').textContent = `${tr.dim}: ${usedW} × ${usedH} px (${tr.raw}: ${rawW} × ${rawH})`;
+    document.getElementById('statLen').textContent = `${len.toLocaleString()} ${tr.chars}`;
+  } catch (err) {
+    document.getElementById('statDim').textContent = 'Error: ' + err.message;
+  }
+}
+
+function copyOut(asXml, btn) {
+  let txt = document.getElementById('out').value;
+  if (!txt) return;
+  if (asXml) txt = txt.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  navigator.clipboard.writeText(txt);
+  const old = btn.textContent;
+  btn.textContent = I18N[lang].copied;
+  setTimeout(() => { btn.textContent = old; }, 1000);
+}
+
+initAssets();
+applyTheme();
+applyLang();
+</script>
+</body>
+</html>
