@@ -18,3 +18,27 @@ Bu uygulama oyunda yaratıcı içerikler üretmek isteyen oyuncular için tasarl
 
 **SimplePlanes Türkiye Topluluğu Yöneticisi:** Exzenor  
 *Geliştirme sürecinde yapay zeka desteği alınmıştır.*
+
+
+
+ENG: 
+# SP2 RichText Studio
+
+A web-based creative tool that converts images into RichText code for SimplePlanes 2 (SP2) Labels and HUDs.
+
+## Live Demo (No Download Required)
+Use the application directly in your browser:
+👉 **https://YOUR-USERNAME.github.io/sp2-richtext-studio/**
+
+## Features
+- Converts PNG / JPG / WEBP images into SP2 `Label.State` compatible RichText format.
+- Automatic transparent border cropping (Auto-Trim) and color merging to save characters.
+- `Label Width` / `Height` box fit checker and character count performance warnings.
+- One-click copy for in-game (**Copy SP2**) or Overload (**Copy XML**) formats.
+- Dark/Light mode, customizable button & text colors, and 6 language options (EN, TR, RU, 中文, FR, DE).
+
+## Disclaimer
+This application is designed for players who want to create creative content in-game. Any misuse of this application is solely the user's responsibility.
+
+**SimplePlanes Türkiye Community Admin:** Exzenor  
+*Developed with AI assistance.*
